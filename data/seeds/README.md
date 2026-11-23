@@ -1,8 +1,9 @@
 # Données de départ
 
-Fichiers à remplir par Precious, à partir des produits et marchés validés par le groupe.
+Les correspondances ci-dessous suivent l'annexe FAO vérifiée le 22/11/2026.
 
-- `produits.csv` : maïs, soja, haricot (une fois les codes et noms FAO confirmés).
-- `marches.csv` : Bohicon, Abomey, Covè, et un 4e marché encore à confirmer.
-
-Aucun prix n'est stocké ici. Les prix viendront de l'import FAO ou de la saisie dans la page admin.
+- Produits : Maïs Blanc (annoncé « Maïs »), Soja, Haricot blanc.
+- Marchés : Bohicon, Houndjro (Abomey), Azogotchébou (Covè), Hlanxi (Zogbodomey).
+- Les touches produit sont 1, 2 et 3.
+- Les sources sont initialisées par le seed : FPMA (SIM-Bénin) et saisie manuelle.
+- Aucun prix n'est stocké dans les seeds. Les observations FAO importées restent en attente de validation.
