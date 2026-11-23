@@ -117,3 +117,37 @@ def test_dry_run_annule_toute_insertion() -> None:
         assert session.scalar(select(Prix.id)) is None
         assert session.scalar(select(Source.id).where(Source.code == "FAO_FPMA")) is None
     engine.dispose()
+
+
+def test_import_fao_reel_apres_seed_mvp() -> None:
+    """Après seed réel : import d'une ligne au format FAO (Houndjro / Maïs Blanc)."""
+    from pathlib import Path
+
+    from app.db.seed import charger_donnees
+
+    seeds = Path(__file__).resolve().parents[1] / "data" / "seeds"
+    engine = _base()
+    with Session(engine) as session:
+        charger_donnees(session, seeds)
+        session.commit()
+
+        ligne = {
+            "produit": "Maïs Blanc",
+            "marche": "Houndjro (Abomey)",
+            "date": "2026-10-19",
+            "prix": "128.57",
+            "type": "detail",
+            "unite": "Kilogramme",
+            "devise": "XOF",
+        }
+        resume = importer_lignes(session, [ligne])
+        session.commit()
+
+        assert resume["importees"] == 1
+        prix = session.scalars(select(Prix)).one()
+        assert prix.statut == "en_attente"
+        assert prix.unite == "kg"
+        assert prix.type_prix == "detail"
+        assert prix.date_releve == date(2026, 10, 19)
+        assert prix.prix_fcfa == Decimal("128.57")
+    engine.dispose()

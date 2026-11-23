@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import (
@@ -12,6 +12,7 @@ from sqlalchemy import (
     CHAR,
     Date,
     DateTime,
+    Float,
     ForeignKey,
     Integer,
     Numeric,
@@ -39,6 +40,7 @@ class Produit(Base):
 
     __table_args__ = (
         CheckConstraint("touche BETWEEN 1 AND 9", name="ck_produit_touche"),
+        UniqueConstraint("touche", name="uq_produit_touche"),
     )
 
 
@@ -92,10 +94,10 @@ class Prix(Base):
     prix_fcfa: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     unite: Mapped[str] = mapped_column(String, nullable=False, default="kg")
     type_prix: Mapped[str] = mapped_column(String, nullable=False, default="detail")
-    date_releve: Mapped[Date] = mapped_column(Date, nullable=False)
+    date_releve: Mapped[date] = mapped_column(Date, nullable=False)
     source_id: Mapped[int] = mapped_column(ForeignKey("source.id"), nullable=False)
     statut: Mapped[str] = mapped_column(String, nullable=False, default="en_attente")
-    score_anomalie: Mapped[float | None] = mapped_column()
+    score_anomalie: Mapped[float | None] = mapped_column(Float)
     motif_anomalie: Mapped[str | None] = mapped_column(Text)
     saisi_par: Mapped[int | None] = mapped_column(ForeignKey("utilisateur.id"))
     valide_par: Mapped[int | None] = mapped_column(ForeignKey("utilisateur.id"))
