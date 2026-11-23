@@ -57,6 +57,10 @@ class Settings(BaseSettings):
     maj_fao_au_demarrage: bool = True
     maj_fao_tout_benin: bool = False
 
+    # Source des prix touche 1 : "fao" (CSV) ou "base" (pas encore prêt).
+    source_prix: str = "fao"
+    prix_fao_csv: str = "data/raw/prix_fao.csv"
+
     @model_validator(mode="after")
     def _groq_defaults(self) -> "Settings":
         # Clé Groq (gsk_…) sans base URL explicite → endpoint Groq.
