@@ -101,7 +101,7 @@ class Appel(Base):
 class Interaction(Base):
     __tablename__ = "interaction"
     __table_args__ = (CheckConstraint("methode IS NULL OR methode IN ('llm','regles')", name="ck_interaction_methode"),)
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
     appel_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("appel.id"), nullable=False)
     etape: Mapped[str] = mapped_column(Text, nullable=False)
     entree: Mapped[str] = mapped_column(Text, nullable=False)
