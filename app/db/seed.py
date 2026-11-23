@@ -60,6 +60,8 @@ def _upsert_rows(
             for key, value in row.items()
             if key not in {"code", "actif"} and key in model.__table__.columns
         }
+        if model is Produit:
+            values["touche"] = int(row["touche"])
         values["actif"] = _bool_value(row.get("actif", "true"), field="actif")
         if current is None:
             session.add(model(code=row["code"], **values))
