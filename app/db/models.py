@@ -117,7 +117,7 @@ class DemandeRappel(Base):
     __table_args__ = (
         CheckConstraint("statut IN ('en_attente','fait','echec','expire')", name="ck_rappel_statut"),
     )
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
     numero_chiffre: Mapped[str | None] = mapped_column(Text)
     numero_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     motif: Mapped[str] = mapped_column(Text, nullable=False)
@@ -136,7 +136,7 @@ class ListeNoire(Base):
 
 class Journal(Base):
     __tablename__ = "journal"
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
     utilisateur_id: Mapped[int | None] = mapped_column(ForeignKey("utilisateur.id"))
     action: Mapped[str] = mapped_column(Text, nullable=False)
     cible: Mapped[str] = mapped_column(Text, nullable=False)
