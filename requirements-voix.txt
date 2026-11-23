@@ -3,5 +3,6 @@
 # Installation sur la machine qui transcrit et synthétise :
 #   pip install -r requirements-voix.txt
 #
-faster-whisper>=1.0,<2
-# piper-tts  # à installer selon l'environnement (binaire Piper + voix française)
+faster-whisper==1.2.1
+piper-tts==1.8.0
+av==15.1.0
