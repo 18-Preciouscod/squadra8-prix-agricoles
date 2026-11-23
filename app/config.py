@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     hash_pepper: str = ""
     admin_email: str = ""
     admin_password_initial: str = ""
+    admin_session_secret: str = ""
     question_voix_active: bool = True
     whisper_modele: str = "small"
     twilio_account_sid: str = ""
