@@ -13,7 +13,7 @@
 <section id="app" class="hidden">
 <div class="card"><strong id="who"></strong> <button class="secondary" id="logout">Déconnexion</button>
 <h2>Prix à traiter</h2><button id="refresh">Actualiser</button> <button id="import">Importer les données FPMA</button><span id="status" class="muted"></span>
-<div style="overflow:auto"><table><thead><tr><th>Produit / marché</th><th>Prix</th><th>Date</th><th>Source</th><th>Alerte</th><th>Décision</th></tr></thead><tbody id="rows"></tbody></table></div>
+<div style="overflow:auto"><table><thead><tr><th>Produit / marché</th><th>Prix</th><th>Date</th><th>Source</th><th>Score / alerte</th><th>Décision</th></tr></thead><tbody id="rows"></tbody></table></div>
 </div>
 <div class="card"><h2>Saisie manuelle</h2><form id="entry"><div class="grid">
 <select name="produit"><option value="mais">Maïs</option><option value="soja">Soja</option><option value="haricot">Haricot</option></select>
@@ -25,7 +25,7 @@
 </section></main>
 <script>
 const $=s=>document.querySelector(s), api=async(path,opts={})=>{const r=await fetch('/api/admin'+path,{credentials:'same-origin',...opts,headers:{'Content-Type':'application/json',...(opts.headers||{})}});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.detail||'Erreur serveur');return d};
-function showApp(user){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');$('#who').textContent=user.nom+' ('+user.role+')';load()}
+const esc=v=>String(v??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[ch]));\nfunction showApp(user){$('#login').classList.add('hidden');$('#app').classList.remove('hidden');$('#who').textContent=user.nom+' ('+user.role+')';load()}
 async function load(){try{const rows=await api('/prix?statut=en_attente');$('#rows').innerHTML=rows.map(p=>'<tr><td>'+p.produit+'<br><small>'+p.marche+'</small></td><td>'+p.prix_fcfa+' F / '+p.unite+'</td><td>'+p.date_releve+'</td><td>'+p.source+'</td><td class="alert">'+(p.motif_anomalie||'À examiner')+'</td><td class="actions"><button data-ok="'+p.id+'">Valider</button><button class="secondary" data-no="'+p.id+'">Rejeter</button></td></tr>').join('')||'<tr><td colspan="6">Aucun prix en attente.</td></tr>';$('#status').textContent=rows.length+' prix en attente';}catch(e){$('#status').textContent=e.message}}
 $('#loginForm').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.target);try{const u=await api('/login',{method:'POST',body:JSON.stringify({email:f.get('email'),password:f.get('password')})});showApp(u.utilisateur)}catch(err){$('#loginMsg').textContent=err.message}};
 $('#refresh').onclick=load;
