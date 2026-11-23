@@ -1,7 +1,8 @@
-"""Comprend l'intention via Groq (JSON strict). Jamais de prix.
+"""Comprend l'intention via Groq, puis Gemini, puis règles. Jamais de prix.
 
 Responsable : Gopal.
 
+Ordre de secours : Groq → Gemini → règles (app/ia/regles.py).
 Règle : l'IA comprend seulement (intention, produit, marché).
 Les prix viennent ensuite de la base, jamais du modèle.
 """
@@ -22,6 +23,7 @@ from app.ia.regles import comprendre_par_regles
 logger = logging.getLogger(__name__)
 
 TIMEOUT_SECONDS = 3.0
+Sources = Literal["groq", "gemini", "regles"]
 Intentions = Literal["prix", "juger_offre", "autre", "inconnu"]
 
 SYSTEM_PROMPT = """Tu analyses une phrase d'un producteur agricole du Bénin (département du Zou).
@@ -36,6 +38,8 @@ Si la demande est hors sujet, intention = "autre".
 Si tu ne comprends pas, intention = "inconnu".
 """
 
+_ERREURS_LLM = (OpenAIError, ValidationError, ValueError, RuntimeError, TimeoutError)
+
 
 class IntentionResult(BaseModel):
     """Sortie structurée : compréhension seule, aucun prix."""
@@ -44,7 +48,7 @@ class IntentionResult(BaseModel):
     produit: str | None = None
     marche: str | None = None
     confiance: float = Field(default=0.0, ge=0.0, le=1.0)
-    source: Literal["groq", "regles"] = "groq"
+    source: Sources = "groq"
 
     @field_validator("produit", "marche", mode="before")
     @classmethod
@@ -55,11 +59,10 @@ class IntentionResult(BaseModel):
         return text or None
 
 
-def _client() -> OpenAI:
-    settings = get_settings()
+def _client(api_key: str, base_url: str) -> OpenAI:
     return OpenAI(
-        api_key=settings.openai_api_key,
-        base_url=settings.openai_base_url,
+        api_key=api_key,
+        base_url=base_url,
         timeout=TIMEOUT_SECONDS,
         max_retries=0,
     )
@@ -83,24 +86,27 @@ def _extraire_json(texte: str) -> dict[str, Any]:
     return data
 
 
-def _appeler_groq(texte: str) -> IntentionResult:
-    settings = get_settings()
-    if not settings.openai_api_key:
-        raise RuntimeError("OPENAI_API_KEY / GROQ_API_KEY manquante")
+def _appeler_llm(
+    texte: str,
+    *,
+    api_key: str,
+    base_url: str,
+    model: str,
+    source: Sources,
+    extra_options: dict[str, Any] | None = None,
+) -> IntentionResult:
+    if not api_key:
+        raise RuntimeError(f"clé API manquante pour {source}")
 
-    options: dict[str, Any] = {}
-    if settings.llm_reasoning_effort:
-        options["reasoning_effort"] = settings.llm_reasoning_effort
-
-    response = _client().chat.completions.create(
-        model=settings.openai_model,
+    response = _client(api_key, base_url).chat.completions.create(
+        model=model,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": texte.strip()},
         ],
         temperature=0,
         max_tokens=400,
-        **options,
+        **(extra_options or {}),
     )
     brut = (response.choices[0].message.content or "").strip()
     data = _extraire_json(brut)
@@ -108,13 +114,39 @@ def _appeler_groq(texte: str) -> IntentionResult:
     data.pop("prix", None)
     data.pop("montant", None)
     data.pop("price", None)
-    return IntentionResult.model_validate({**data, "source": "groq"})
+    return IntentionResult.model_validate({**data, "source": source})
+
+
+def _appeler_groq(texte: str) -> IntentionResult:
+    settings = get_settings()
+    options: dict[str, Any] = {}
+    if settings.llm_reasoning_effort:
+        options["reasoning_effort"] = settings.llm_reasoning_effort
+    return _appeler_llm(
+        texte,
+        api_key=settings.openai_api_key,
+        base_url=settings.openai_base_url,
+        model=settings.openai_model,
+        source="groq",
+        extra_options=options,
+    )
+
+
+def _appeler_gemini(texte: str) -> IntentionResult:
+    settings = get_settings()
+    return _appeler_llm(
+        texte,
+        api_key=settings.gemini_api_key,
+        base_url=settings.gemini_base_url,
+        model=settings.gemini_model,
+        source="gemini",
+    )
 
 
 def comprendre(texte: str) -> dict:
     """Retourne l'intention, le produit et le marché, sans aucun prix.
 
-    Essaie Groq ; en cas d'erreur, délai ou JSON invalide → règles de secours.
+    Ordre : Groq → Gemini (si clé) → règles de secours.
     """
     texte = (texte or "").strip()
     if not texte:
@@ -128,6 +160,16 @@ def comprendre(texte: str) -> dict:
 
     try:
         return _appeler_groq(texte).model_dump()
-    except (OpenAIError, ValidationError, ValueError, RuntimeError, TimeoutError) as exc:
-        logger.warning("Groq indisponible ou réponse invalide, repli sur règles : %s", exc)
-        return comprendre_par_regles(texte)
+    except _ERREURS_LLM as exc:
+        logger.warning("Groq indisponible ou réponse invalide : %s", exc)
+
+    settings = get_settings()
+    if settings.gemini_api_key:
+        try:
+            return _appeler_gemini(texte).model_dump()
+        except _ERREURS_LLM as exc:
+            logger.warning("Gemini indisponible ou réponse invalide, repli sur règles : %s", exc)
+    else:
+        logger.warning("Pas de clé Gemini, repli sur règles")
+
+    return comprendre_par_regles(texte)

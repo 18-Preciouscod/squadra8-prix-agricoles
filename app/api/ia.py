@@ -25,7 +25,7 @@ class IntentionOut(BaseModel):
 
 @router.post("/intention", response_model=IntentionOut)
 def post_intention(body: IntentionIn) -> IntentionOut:
-    """Comprend l'intention (Groq, sinon règles). Aucun prix dans la réponse."""
+    """Comprend l'intention (Groq → Gemini → règles). Aucun prix dans la réponse."""
     resultat = comprendre(body.texte)
     # Ceinture : retirer toute clé de prix si un jour elle apparaissait.
     resultat.pop("prix", None)
