@@ -1,0 +1,1 @@
+Les migrations sont gérées par Alembic. Commandes : alembic upgrade head ; python -m app.db.seed.
