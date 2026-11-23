@@ -1,0 +1,18 @@
+flowchart LR
+  subgraph Canaux["Canaux (adaptateurs)"]
+    SIM["Simulateur web<br/>(navigateur, micro)"]
+    TW["Twilio<br/>(bonus jeu-ven)"]
+  end
+  SIM -->|"bip, touches, audio"| API["API FastAPI"]
+  TW -.->|"webhooks"| API
+  API --> MOT["Moteur de dialogue<br/>(indépendant du canal)"]
+  MOT -->|"touche 3 : texte"| IA["IA : comprend<br/>Whisper + GPT-4.1 mini<br/>(repli à règles)"]
+  IA -->|"intention, produit, marché<br/>JAMAIS de prix"| MOT
+  MOT -->|"demande de prix"| PRIX["Service prix<br/>(écart de l'offre)"]
+  PRIX -->|"prix VALIDÉS seulement"| DB[("PostgreSQL")]
+  MOT -->|"phrase"| VOIX["Voix Piper<br/>(clips + à la volée)"]
+  VOIX --> SIM
+  FAO["FAO FPMA<br/>SIM-Bénin (API ouverte)"] -->|"import"| DB
+  ADM["Page admin<br/>saisie manuelle + validation"] --> DB
+  IA2["IA 2 : prix bizarres"] -->|"signale"| ADM
+  DB --> IA2

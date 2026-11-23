@@ -221,3 +221,21 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------------------
+# Ajouts Squadra 8 (plan de réalisation, fichiers de départ)
+# ---------------------------------------------------------------------------
+
+# Secrets locaux (déjà listé plus haut, rappelé ici)
+# .env
+
+# Données brutes téléchargées (FAO, etc.) : on garde seulement le dossier
+data/raw/*
+!data/raw/.gitkeep
+
+# Clips audio générés par Piper (ils se régénèrent avec voix/generer_clips.py)
+voix/clips/*.wav
+
+# Modèles Whisper téléchargés localement (trop lourds pour Git)
+models/whisper/
+*.pt

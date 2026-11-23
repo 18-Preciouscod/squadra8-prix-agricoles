@@ -1,0 +1,29 @@
+# Vérifications automatiques à chaque push et à chaque demande de fusion (PR) :
+# style du code (ruff) et tests (pytest).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verifications:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dépendances
+        run: pip install -r requirements.txt
+
+      - name: Vérifier le style (ruff)
+        run: ruff check .
+
+      - name: Lancer les tests (pytest)
+        run: pytest

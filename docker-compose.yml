@@ -1,0 +1,35 @@
+# Deux services : l'application FastAPI et PostgreSQL 16.
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      # Dans le réseau Docker, l'hôte de la base est le service « db ».
+      DATABASE_URL: postgresql+psycopg://squadra8:squadra8@db:5432/prix_agricoles
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: squadra8
+      POSTGRES_PASSWORD: squadra8
+      POSTGRES_DB: prix_agricoles
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U squadra8 -d prix_agricoles"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
