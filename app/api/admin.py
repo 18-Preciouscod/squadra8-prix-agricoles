@@ -112,18 +112,18 @@ def _serialize(row: Prix, db: Session) -> dict:
 
 
 @router.post("/login")
-def login(body: LoginIn, response: Response, db: Session = Depends(get_session)):
+def login(body: LoginIn, request: Request, response: Response, db: Session = Depends(get_session)):
     user = db.scalar(select(Utilisateur).where(Utilisateur.email == body.email.strip().lower()))
     if user is None or not user.actif or not bcrypt.checkpw(body.password.encode(), user.mot_de_passe_hash.encode()):
         raise HTTPException(401, "Identifiants invalides.")
-    response.set_cookie(COOKIE, _token(user), httponly=True, secure=False,
+    response.set_cookie(COOKIE, _token(user), httponly=True, secure=request.url.scheme == "https",
                         samesite="strict", max_age=COOKIE_TTL, path="/")
     return {"ok": True, "utilisateur": {"nom": user.nom_affiche, "role": user.role}}
 
 
 @router.post("/logout")
-def logout(response: Response):
-    response.delete_cookie(COOKIE, path="/", httponly=True, secure=False, samesite="strict")
+def logout(request: Request, response: Response):
+    response.delete_cookie(COOKIE, path="/", httponly=True, secure=request.url.scheme == "https", samesite="strict")
     return {"ok": True}
 
 
@@ -133,10 +133,10 @@ def me(user: Utilisateur = Depends(current_user)):
 
 
 @router.get("/prix")
-def lister_prix(statut_prix: Literal["en_attente", "valide", "rejete"] = "en_attente",
+def lister_prix(statut: Literal["en_attente", "valide", "rejete"] = "en_attente",
                 db: Session = Depends(get_session),
                 user: Utilisateur = Depends(_require_roles("admin", "validateur", "saisie"))):
-    rows = db.scalars(select(Prix).where(Prix.statut == statut_prix).order_by(Prix.date_releve.desc(), Prix.id.desc())).all()
+    rows = db.scalars(select(Prix).where(Prix.statut == statut).order_by(Prix.date_releve.desc(), Prix.id.desc())).all()
     return [_serialize(row, db) for row in rows]
 
 
