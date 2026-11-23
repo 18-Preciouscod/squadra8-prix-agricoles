@@ -1,13 +1,15 @@
 """Jouer un appel dans le terminal : python -m app.dialogue.console"""
-import os
 
+from __future__ import annotations
+
+from app.config import get_settings
 from app.dialogue.moteur import Evenement, Moteur
-from tests.fakes import services_fakes
+from app.dialogue.services_prix import services_reels
 
 
-def main():
-    voix = os.getenv("QUESTION_VOIX_ACTIVE", "true").lower() == "true"
-    moteur = Moteur(services_fakes(), voix_active=voix)
+def main() -> None:
+    settings = get_settings()
+    moteur = Moteur(services_reels(), voix_active=settings.question_voix_active)
     sess = moteur.nouvelle_session("console")
     tour = moteur.traiter(sess, Evenement(type="DECROCHE"))
     while True:
@@ -23,8 +25,9 @@ def main():
         elif saisie == "":
             evenements = [Evenement(type="SILENCE")]
         else:
-            evenements = [Evenement(type="TOUCHE", valeur=c)
-                          for c in saisie.replace(" ", "")]
+            evenements = [
+                Evenement(type="TOUCHE", valeur=c) for c in saisie.replace(" ", "")
+            ]
         for ev in evenements:
             tour = moteur.traiter(sess, ev)
             if tour.fin:
