@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator
+from contextlib import contextmanager
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -32,6 +33,7 @@ def nouvelle_session() -> Session:
     return _session_factory()
 
 
+@contextmanager
 def get_session() -> Generator[Session, None, None]:
     """Dépendance FastAPI : ouvre puis ferme une session."""
     session = nouvelle_session()
