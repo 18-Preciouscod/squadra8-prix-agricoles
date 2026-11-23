@@ -33,9 +33,18 @@ def nouvelle_session() -> Session:
     return _session_factory()
 
 
-@contextmanager
 def get_session() -> Generator[Session, None, None]:
     """Dépendance FastAPI : ouvre puis ferme une session."""
+    session = nouvelle_session()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+@contextmanager
+def session_scope() -> Generator[Session, None, None]:
+    """Session contextuelle pour scripts et services synchrones."""
     session = nouvelle_session()
     try:
         yield session
