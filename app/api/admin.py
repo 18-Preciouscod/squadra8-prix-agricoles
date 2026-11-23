@@ -6,13 +6,13 @@ import hashlib
 import hmac
 import json
 import secrets
-from datetime import date, datetime, timedelta, timezone
-from decimal import Decimal, InvalidOperation
+from datetime import date, datetime, timezone
+from decimal import Decimal
 from typing import Literal
 
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -116,14 +116,14 @@ def login(body: LoginIn, response: Response, db: Session = Depends(get_session))
     user = db.scalar(select(Utilisateur).where(Utilisateur.email == body.email.strip().lower()))
     if user is None or not user.actif or not bcrypt.checkpw(body.password.encode(), user.mot_de_passe_hash.encode()):
         raise HTTPException(401, "Identifiants invalides.")
-    response.set_cookie(COOKIE, _token(user), httponly=True, secure=True,
+    response.set_cookie(COOKIE, _token(user), httponly=True, secure=False,
                         samesite="strict", max_age=COOKIE_TTL, path="/")
     return {"ok": True, "utilisateur": {"nom": user.nom_affiche, "role": user.role}}
 
 
 @router.post("/logout")
 def logout(response: Response):
-    response.delete_cookie(COOKIE, path="/", httponly=True, secure=True, samesite="strict")
+    response.delete_cookie(COOKIE, path="/", httponly=True, secure=False, samesite="strict")
     return {"ok": True}
 
 
