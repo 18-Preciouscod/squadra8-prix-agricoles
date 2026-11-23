@@ -5,6 +5,7 @@ Responsable : Gopal.
 
 from functools import lru_cache
 
+from pydantic import AliasChoices, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,9 +19,25 @@ class Settings(BaseSettings):
     )
 
     database_url: str = "postgresql+psycopg://squadra8:squadra8@localhost:5432/prix_agricoles"
+
+    # IA principale : Groq (ou tout fournisseur compatible OpenAI).
+    openai_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("GROQ_API_KEY", "OPENAI_API_KEY"),
+    )
+    openai_base_url: str = "https://api.groq.com/openai/v1"
+    openai_model: str = Field(
+        default="openai/gpt-oss-120b",
+        validation_alias=AliasChoices("OPENAI_MODEL", "LLM_MODEL"),
+    )
+    # Pour les modèles « reasoning » Groq (gpt-oss-*) : low | medium | high.
+    llm_reasoning_effort: str | None = None
+
+    # Secours Azure (optionnel).
     azure_openai_endpoint: str = ""
     azure_openai_key: str = ""
     azure_openai_deployment: str = "gpt-4.1-mini"
+
     fernet_key: str = ""
     hash_pepper: str = ""
     admin_email: str = ""
@@ -30,6 +47,16 @@ class Settings(BaseSettings):
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
     twilio_phone_number: str = ""
+
+    @model_validator(mode="after")
+    def _groq_defaults(self) -> "Settings":
+        # Clé Groq (gsk_…) sans base URL explicite → endpoint Groq.
+        if (
+            "openai_base_url" not in self.model_fields_set
+            and self.openai_api_key.startswith("gsk_")
+        ):
+            self.openai_base_url = "https://api.groq.com/openai/v1"
+        return self
 
 
 @lru_cache

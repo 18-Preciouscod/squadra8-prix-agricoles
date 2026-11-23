@@ -6,7 +6,7 @@ flowchart LR
   SIM -->|"bip, touches, audio"| API["API FastAPI"]
   TW -.->|"webhooks"| API
   API --> MOT["Moteur de dialogue<br/>(indépendant du canal)"]
-  MOT -->|"touche 3 : texte"| IA["IA : comprend<br/>Whisper + GPT-4.1 mini<br/>(repli à règles)"]
+  MOT -->|"touche 3 : texte"| IA["IA : comprend<br/>Whisper + Groq<br/>(repli à règles)"]
   IA -->|"intention, produit, marché<br/>JAMAIS de prix"| MOT
   MOT -->|"demande de prix"| PRIX["Service prix<br/>(écart de l'offre)"]
   PRIX -->|"prix VALIDÉS seulement"| DB[("PostgreSQL")]
