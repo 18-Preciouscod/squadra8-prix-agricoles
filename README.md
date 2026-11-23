@@ -22,7 +22,12 @@ Docker lance l'application et PostgreSQL 16 ensemble.
 
 ```bash
 docker compose up --build
+# Dans un second terminal, après démarrage :
+docker compose exec app alembic upgrade head
+docker compose exec app python -m app.db.seed
 ```
+
+L'interface d'administration est disponible sur `/admin/`. Avant la première connexion, renseigner dans `.env` : `ADMIN_EMAIL`, `ADMIN_PASSWORD_INITIAL` et `ADMIN_SESSION_SECRET` (une valeur longue et aléatoire). Le compte initial est créé par le seed uniquement si cet e-mail n'existe pas. L'API admin est documentée dans `/docs`. Les prix importés restent en attente jusqu'à validation humaine. Les prix publics ne renvoient que les observations validées, au détail au kilo, âgées de 60 jours maximum.
 
 Ouvrir ensuite dans le navigateur : [http://localhost:8000/health](http://localhost:8000/health). Tu dois voir `{"ok": true}`. L'adresse [http://localhost:8000/sante](http://localhost:8000/sante) répond aussi `{"statut": "ok"}`.
 
