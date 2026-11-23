@@ -1,9 +1,7 @@
 """Chargement idempotent des référentiels de départ."""
 from __future__ import annotations
 
-import csv
-import os
-from pathlib import Path
+import csvfrom pathlib import Path
 
 import bcrypt
 from sqlalchemy import select
