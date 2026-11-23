@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     # Pour les modèles « reasoning » Groq (gpt-oss-*) : low | medium | high.
     llm_reasoning_effort: str | None = None
 
+    # 2e secours : Gemini (API compatible OpenAI), optionnel.
+    gemini_api_key: str = ""
+    gemini_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
+    gemini_model: str = "gemini-3.5-flash-lite"
+
     # Secours Azure (optionnel).
     azure_openai_endpoint: str = ""
     azure_openai_key: str = ""
