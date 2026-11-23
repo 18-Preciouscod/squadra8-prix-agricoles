@@ -2,7 +2,7 @@
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.orm import Session
 
-from app.db.models import Base, Appel, Interaction, Journal, Prix, DemandeRappel
+from app.db.models import Base, Appel, Interaction
 from data.scripts.maj_fao import mapper_type_prix, filtrer_series_mvp
 
 
