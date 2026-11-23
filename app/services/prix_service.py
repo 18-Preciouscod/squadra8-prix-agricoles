@@ -5,7 +5,6 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
 
 from app.db.models import Marche, Prix, Produit, Source
 from app.db.session import session_scope
