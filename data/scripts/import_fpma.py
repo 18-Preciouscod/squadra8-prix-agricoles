@@ -9,7 +9,6 @@ from __future__ import annotations
 import argparse
 import csv
 import logging
-import re
 import sys
 import unicodedata
 from datetime import date
@@ -28,8 +27,6 @@ from app.db.models import Marche, Prix, Produit, Source  # noqa: E402
 from app.db.session import get_session_factory  # noqa: E402
 
 CSV_DEFAUT = RACINE / "data" / "raw" / "prix_fao.csv"
-PRODUITS_CSV = RACINE / "data" / "seeds" / "produits.csv"
-MARCHES_CSV = RACINE / "data" / "seeds" / "marches.csv"
 SOURCE_CODE = "FAO_FPMA"
 SOURCE_NOM = "FAO - FPMA"
 SOURCE_URL = "https://www.fao.org/giews/food-prices/tool/public/"
