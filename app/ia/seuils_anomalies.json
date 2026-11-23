@@ -1,0 +1,13 @@
+{
+  "seuil_A_pct": 30,
+  "ecart_max_A_jours": 21,
+  "seuil_B_pct": 50,
+  "fenetre_B_jours": 3,
+  "min_voisins_B": 1,
+  "fenetre_C_mois": 12,
+  "marge_C_pct": 15,
+  "min_observations_C": 8,
+  "facteur_10_ratio": 8,
+  "confusion_sac_kilo_ratio": 80,
+  "unites_acceptees": ["Kilogramme", "kg", "sac_100kg"]
+}
