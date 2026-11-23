@@ -26,7 +26,6 @@ def _referentiels(session: Session) -> None:
                 commune="Bohicon",
                 nom_fpma="Bohicon",
             ),
-            Source(code="FAO_FPMA", nom="FAO - FPMA"),
         ]
     )
     session.commit()
@@ -116,5 +115,5 @@ def test_dry_run_annule_toute_insertion() -> None:
 
         assert resume["importees"] == 1
         assert session.scalar(select(Prix.id)) is None
-        assert session.scalar(select(Source.id).where(Source.code == "FAO_FPMA")) is not None
+        assert session.scalar(select(Source.id).where(Source.code == "FAO_FPMA")) is None
     engine.dispose()
