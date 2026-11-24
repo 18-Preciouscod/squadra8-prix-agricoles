@@ -201,41 +201,20 @@ def rejeter_prix(prix_id: int, body: RejetIn, db: Session = Depends(get_session)
 @router.post("/import/fpma")
 def importer_fpma(db: Session = Depends(get_session),
                   user: Utilisateur = Depends(_require_roles("admin", "saisie"))):
-    from data.scripts.maj_fao import lancer_maj_fao
-    from pathlib import Path
-    import csv
+    """Importe le CSV FAO déjà présent (pas d'appel réseau ici). Prix en_attente."""
+    from data.scripts.import_fpma import CSV_DEFAUT, importer_lignes, lire_csv
 
-    resume = lancer_maj_fao()
-    if not resume.get("succes"):
-        raise HTTPException(502, f"Import FPMA impossible : {resume.get('erreur')}")
-    csv_path = Path(resume["chemin"])
-    fpma = db.scalar(select(Source).where(Source.code == "fpma"))
-    if fpma is None:
-        raise HTTPException(500, "Source FPMA absente : lancer le seed.")
-    produits = {p.nom_fpma: p for p in db.scalars(select(Produit)).all()}
-    marches = {m.nom_fpma: m for m in db.scalars(select(Marche)).all()}
-    ajoutes = 0
-    with csv_path.open(encoding="utf-8-sig", newline="") as f:
-        for r in csv.DictReader(f):
-            p, m = produits.get(r["produit"]), marches.get(r["marche"])
-            if not p or not m or r["type"] != "detail" or r["devise"] != "XOF":
-                continue
-            if r["unite"].strip().upper() not in {"KG", "KILOGRAM", "KILOGRAMME"}:
-                continue
-            d = date.fromisoformat(r["date"])
-            if not date(2026, 8, 1) <= d <= date.today():
-                continue
-            exists = db.scalar(select(Prix.id).where(Prix.produit_id == p.id, Prix.marche_id == m.id,
-                Prix.date_releve == d, Prix.type_prix == "detail", Prix.source_id == fpma.id))
-            if exists:
-                continue
-            db.add(Prix(produit_id=p.id, marche_id=m.id, prix_fcfa=Decimal(r["prix"]),
-                unite="kg", type_prix="detail", date_releve=d, source_id=fpma.id,
-                statut="en_attente"))
-            ajoutes += 1
+    if not CSV_DEFAUT.is_file():
+        raise HTTPException(
+            404,
+            f"CSV FAO absent ({CSV_DEFAUT}). Lancer d'abord python data/scripts/maj_fao.py.",
+        )
+    lignes = lire_csv(CSV_DEFAUT)
+    resume = importer_lignes(db, lignes)
+    ajoutes = int(resume.get("importees", 0))
     _journal(db, user, "import_fpma", f"{ajoutes} observations")
     db.commit()
-    return {"succes": True, "nouveaux": ajoutes, "csv": resume}
+    return {"succes": True, "nouveaux": ajoutes, "detail": resume}
 
 
 @router.get("/rappels")

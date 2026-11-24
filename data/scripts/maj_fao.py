@@ -38,8 +38,11 @@ MAX_TENTATIVES = 5
 PRODUITS_MVP = frozenset(
     {
         "Maïs Blanc",
+        "Maïs Jaune",
         "Soja",
         "Haricot blanc",
+        "Haricot noir",
+        "Haricot rouge",
     }
 )
 MARCHES_MVP = frozenset(
@@ -47,7 +50,6 @@ MARCHES_MVP = frozenset(
         "Bohicon",
         "Houndjro (Abomey)",
         "Azogotchébou (Covè)",
-        "Hlanxi (Zogbodomey)",
     }
 )
 
@@ -320,7 +322,7 @@ def _collecter_observations(
 
 
 def _journal_base_non_prete() -> None:
-    logger.info("Import FAO : écriture CSV de secours et base PostgreSQL si disponible")
+    logger.info("base non prête, CSV uniquement")
 
 
 def lancer_maj_fao(
@@ -343,6 +345,8 @@ def lancer_maj_fao(
         "erreur": None,
         "chemin": str(chemin),
     }
+
+    _journal_base_non_prete()
 
     try:
         existantes = lire_csv(chemin)

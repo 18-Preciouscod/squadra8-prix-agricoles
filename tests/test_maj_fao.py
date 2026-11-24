@@ -181,7 +181,7 @@ def test_second_lancement_point_plus_recent(csv_tmp: Path) -> None:
 
 
 def test_echec_reseau_conserve_csv(csv_tmp: Path) -> None:
-    series = [_serie("u1", commodity="Maïs Blanc", market="Bohicon")]
+    series = [_serie("u1", commodity="Maïs Jaune", market="Bohicon")]
     prix = [_prix("u1", [("2026-10-01", 200.0)])]
     routes = {
         "FpmaSerieDomestic/": series,
