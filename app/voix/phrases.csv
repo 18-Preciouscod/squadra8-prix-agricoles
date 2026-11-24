@@ -1,1 +1,20 @@
-identifiant;texte
+﻿identifiant;texte;clip_ok
+A01;Bonjour. Ici le service des prix agricoles. Nos prix viennent du système public d'information sur les marchés et sont vérifiés par une personne.;
+P00;Pour le maïs, tapez 1. Pour le soja, tapez 2. Pour le haricot, tapez 3.;
+M01;Pour les prix du jour sur 4 marchés, tapez 1.;
+M02;Pour juger l'offre d'un acheteur, tapez 2.;
+M03;Pour poser votre question à voix haute, tapez 3.;
+M03B;Pour poser votre question à voix haute, tapez 3 : bientôt disponible.;
+M04;Pour réécouter, tapez 4.;
+R01;Pour une autre information, tapez 1, 2 ou 3. Pour réécouter, tapez 4.;
+V05;Cette fonction arrive bientôt.;
+AV01;Ce prix est un repère, pas une garantie.;
+AV02;Source : le système public d'information sur les marchés du Bénin.;
+E01;Cette touche n'est pas valide.;
+S01;Je n'ai rien entendu.;
+N01;Je n'ai pas compris.;
+F01;Merci de votre appel. Au revoir.;
+O01;Tapez le prix proposé pour un sac de 100 kilos, puis dièse.;
+O02;Ce montant n'est pas valide.;
+X01;Posez votre question après le bip.;
+D01;Il n'y a pas de prix récent pour ce produit.;
