@@ -22,7 +22,12 @@ Docker lance l'application et PostgreSQL 16 ensemble.
 
 ```bash
 docker compose up --build
+# Dans un second terminal, après démarrage :
+docker compose exec app alembic upgrade head
+docker compose exec app python -m app.db.seed
 ```
+
+L'interface d'administration est disponible sur `/admin/`. Avant la première connexion, renseigner dans `.env` : `ADMIN_EMAIL`, `ADMIN_PASSWORD_INITIAL` et `ADMIN_SESSION_SECRET` (une valeur longue et aléatoire). Le compte initial est créé par le seed uniquement si cet e-mail n'existe pas. L'API admin est documentée dans `/docs`. Les prix importés restent en attente jusqu'à validation humaine. Tant que `SOURCE_PRIX=fao` (défaut), les routes publiques lisent le CSV FAO (plan B). Avec `SOURCE_PRIX=base`, elles ne renvoient que les observations validées, au détail au kilo, âgées de 60 jours maximum, avec la date de relevé (jamais « prix du jour »).
 
 Ouvrir ensuite dans le navigateur : [http://localhost:8000/health](http://localhost:8000/health). Tu dois voir `{"ok": true}`. L'adresse [http://localhost:8000/sante](http://localhost:8000/sante) répond aussi `{"statut": "ok"}`.
 
@@ -39,7 +44,16 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 Même vérification : ouvrir `/health` ou `/sante` comme ci-dessus.
 
-Les programmes de voix (Whisper pour transcrire, Piper pour parler) sont optionnels et lourds. Ils s'installent à part : `pip install -r requirements-voix.txt` (Guillaume).
+Les programmes de voix (Whisper pour transcrire, Piper pour parler) sont optionnels et lourds. Ils s'installent à part : `pip install -r requirements-voix.txt` (Guillaume). Sur la machine de démo (Mac), après installation :
+
+```bash
+pip install -r requirements-voix.txt
+python -m piper.download_voices fr_FR-siwis-medium --download-dir models/piper
+python -m app.voix.generer_clips
+python -m app.voix.dire "Maïs blanc à Bohicon : cent trente-sept francs."
+```
+
+Les clips et le modèle **ne vont pas dans Git** (`models/`, `voix/clips/` sont ignorés). Il faut les régénérer sur la machine qui fera la démo, après chaque changement de phrase. Sur macOS, `dire` affiche le chemin du `.wav` : on peut l'écouter avec `afplay` sur ce chemin.
 
 ## Comment on travaille sur le code
 

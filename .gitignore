@@ -244,3 +244,8 @@ voix/clips/*.wav
 # Modèles Whisper téléchargés localement (trop lourds pour Git)
 models/whisper/
 *.pt
+
+#Tous le dossier models (contient piper et whisper)
+models
+#clips de voix
+voix/clips
