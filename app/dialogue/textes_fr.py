@@ -1,11 +1,15 @@
 """Toutes les phrases du service. Rien n'est écrit en dur dans moteur.py."""
-from app.dialogue.nombres import arrondi, date_en_lettres, en_lettres, francs
+
+from __future__ import annotations
+
+from app.dialogue.nombres import date_en_lettres, en_lettres, francs
+from app.services.calculs import vers_100kg
 
 # Phrases fixes (mêmes identifiants que app/voix/phrases.csv)
 TEXTES = {
     "A01": "Bonjour. Ici le service des prix agricoles. Nos prix viennent du système public d'information sur les marchés et sont vérifiés par une personne.",
     "P00": "Pour le maïs, tapez 1. Pour le soja, tapez 2. Pour le haricot, tapez 3.",
-    "M01": "Pour les prix du jour sur 4 marchés, tapez 1.",
+    "M01": "Pour les prix sur 3 marchés, tapez 1.",
     "M02": "Pour juger l'offre d'un acheteur, tapez 2.",
     "M03": "Pour poser votre question à voix haute, tapez 3.",
     "M03B": "Pour poser votre question à voix haute, tapez 3 : bientôt disponible.",
@@ -29,35 +33,53 @@ NOMS_PRODUITS = {"mais": "Maïs blanc", "soja": "Soja", "haricot": "Haricot blan
 TOUCHE_PRODUIT = {"1": "mais", "2": "soja", "3": "haricot"}
 
 
-# Phrases construites avec des données (nombres et dates en toutes lettres)
-def phrase_entete_prix(produit):
+def _prix_annonce_kg(p: dict) -> int:
+    """Prix au kilo annoncé : franc le plus proche (pas aux 5 F)."""
+    return int(round(float(p.get("prix_kg", p["prix_fcfa"]))))
+
+
+def phrase_entete_prix(produit: str) -> str:
     return f"{NOMS_PRODUITS[produit]}, prix de détail au kilo."
 
 
-def phrase_marche(p):
-    return (f"{p['marche']} : {en_lettres(p['prix_fcfa'])} {francs(p['prix_fcfa'])}, "
-            f"relevé le {date_en_lettres(p['date_releve'])}.")
+def phrase_marche(p: dict) -> str:
+    prix = _prix_annonce_kg(p)
+    return (
+        f"{p['marche']} : {en_lettres(prix)} {francs(prix)}, "
+        f"relevé le {date_en_lettres(p['date_releve'])}."
+    )
 
 
-def phrase_cent_kilos(p):
-    total = arrondi(p["prix_fcfa"]) * 100
-    return (f"Soit environ {en_lettres(total)} francs pour cent kilos "
-            f"au prix de détail à {p['marche']}.")
-
-
-def phrases_offre(o):
-    ecart = o["ecart_kg"]
-    e = arrondi(abs(ecart))
-    if e == 0:
-        verdict = "L'offre est égale au prix de détail."
-    elif ecart < 0:
-        verdict = f"L'offre est {en_lettres(e)} {francs(e)} plus basse que le prix de détail."
+def phrase_cent_kilos(p: dict) -> str:
+    if p.get("prix_100kg") is not None:
+        total = int(p["prix_100kg"])
     else:
-        verdict = f"L'offre est {en_lettres(e)} {francs(e)} plus haute que le prix de détail."
+        total = vers_100kg(float(p.get("prix_kg", p["prix_fcfa"])))
+    return (
+        f"Soit environ {en_lettres(total)} francs pour cent kilos "
+        f"au prix de détail à {p['marche']}."
+    )
+
+
+def phrases_offre(o: dict) -> list[str]:
+    """Annonce l'offre avec le verdict de juger_offre et la date du relevé."""
+    verdict = o.get("verdict", "")
+    if verdict == "proche":
+        jugement = "L'offre est proche du prix de détail."
+    elif verdict == "au-dessus":
+        jugement = "L'offre est au-dessus du prix de détail."
+    elif verdict == "en dessous":
+        jugement = "L'offre est en dessous du prix de détail."
+    else:
+        jugement = "L'offre a été comparée au prix de détail."
+
+    ref = float(o["reference_kg"])
+    offre = float(o["offre_kg"])
     return [
-        f"L'acheteur propose {en_lettres(o['offre_kg'])} {francs(o['offre_kg'])} le kilo.",
-        (f"Au détail, le kilo est à {en_lettres(o['reference_kg'])} "
-         f"{francs(o['reference_kg'])} à {o['marche']}, "
-         f"relevé le {date_en_lettres(o['date_releve'])}."),
-        verdict,
+        f"L'acheteur propose {en_lettres(offre)} {francs(offre)} le kilo.",
+        (
+            f"Au détail, le kilo est à {en_lettres(ref)} {francs(ref)} "
+            f"à {o['marche']}, relevé le {date_en_lettres(o['date_releve'])}."
+        ),
+        jugement,
     ]

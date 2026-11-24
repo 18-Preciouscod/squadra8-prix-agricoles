@@ -1,3 +1,8 @@
-piper-tts==1.8.0
+# Dépendances optionnelles pour la voix (Guillaume).
+# Elles sont lourdes (modèles) : ne pas les installer dans la CI.
+# Installation sur la machine qui transcrit et synthétise :
+#   pip install -r requirements-voix.txt
+#
 faster-whisper==1.2.1
+piper-tts==1.8.0
 av==15.1.0

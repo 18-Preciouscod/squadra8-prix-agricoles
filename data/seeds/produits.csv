@@ -1,1 +1,7 @@
 code,nom,nom_fpma,touche,actif
+mais_blanc,Maïs Blanc,Maïs Blanc,1,true
+mais_jaune,Maïs Jaune,Maïs Jaune,2,true
+soja,Soja,Soja,3,true
+haricot_blanc,Haricot blanc,Haricot blanc,4,true
+haricot_noir,Haricot noir,Haricot noir,5,true
+haricot_rouge,Haricot rouge,Haricot rouge,6,true

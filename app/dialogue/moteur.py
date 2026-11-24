@@ -57,7 +57,8 @@ class Session:
 
 
 class Moteur:
-    def __init__(self, services: Services, voix_active: bool = True):
+    def __init__(self, services: Services, voix_active: bool = False):
+        # Touche 3 désactivée tant que I5 (voix) n'est pas branché.
         self.services = services
         self.voix_active = voix_active
 
