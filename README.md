@@ -39,7 +39,16 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 Même vérification : ouvrir `/health` ou `/sante` comme ci-dessus.
 
-Les programmes de voix (Whisper pour transcrire, Piper pour parler) sont optionnels et lourds. Ils s'installent à part : `pip install -r requirements-voix.txt` (Guillaume).
+Les programmes de voix (Whisper pour transcrire, Piper pour parler) sont optionnels et lourds. Ils s'installent à part : `pip install -r requirements-voix.txt` (Guillaume). Sur la machine de démo (Mac), après installation :
+
+```bash
+pip install -r requirements-voix.txt
+python -m piper.download_voices fr_FR-siwis-medium --download-dir models/piper
+python -m app.voix.generer_clips
+python -m app.voix.dire "Maïs blanc à Bohicon : cent trente-sept francs."
+```
+
+Les clips et le modèle **ne vont pas dans Git** (`models/`, `voix/clips/` sont ignorés). Il faut les régénérer sur la machine qui fera la démo, après chaque changement de phrase. Sur macOS, `dire` affiche le chemin du `.wav` : on peut l'écouter avec `afplay` sur ce chemin.
 
 ## Comment on travaille sur le code
 
