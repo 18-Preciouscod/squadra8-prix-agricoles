@@ -1,7 +1,7 @@
 ﻿identifiant;texte;clip_ok
 A01;Bonjour. Ici le service des prix agricoles. Nos prix viennent du système public d'information sur les marchés et sont vérifiés par une personne.;
 P00;Pour le maïs, tapez 1. Pour le soja, tapez 2. Pour le haricot, tapez 3.;
-M01;Pour les prix du jour sur 4 marchés, tapez 1.;
+M01;Pour les prix sur 3 marchés, tapez 1.;
 M02;Pour juger l'offre d'un acheteur, tapez 2.;
 M03;Pour poser votre question à voix haute, tapez 3.;
 M03B;Pour poser votre question à voix haute, tapez 3 : bientôt disponible.;

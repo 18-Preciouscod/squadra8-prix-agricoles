@@ -52,6 +52,20 @@ def test_csv_coherent_avec_textes(tts, tmp_path):
     assert ids == list(T.TEXTES)
 
 
+def test_phrases_csv_commite_aligne_sur_textes() -> None:
+    """Le CSV suivi par git doit coller à T.TEXTES (pas de dérive silencieuse)."""
+    chemin = Path("app/voix/phrases.csv")
+    with chemin.open(encoding="utf-8-sig") as f:
+        lignes = list(csv.DictReader(f, delimiter=";"))
+    assert [ligne["identifiant"] for ligne in lignes] == list(T.TEXTES)
+    for ligne in lignes:
+        assert ligne["texte"] == T.TEXTES[ligne["identifiant"]]
+    textes = " ".join(ligne["texte"] for ligne in lignes).casefold()
+    assert "prix du jour" not in textes
+    assert "4 marchés" not in textes
+    assert "aujourd" not in textes
+
+
 def test_clips_deja_a_jour_ne_sont_pas_refaits(tts):
     generer_clips.generer(tts)
     appels = tts.appels
